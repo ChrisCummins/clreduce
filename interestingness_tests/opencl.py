@@ -99,7 +99,7 @@ class OpenCLInterestingnessTest(base.InterestingnessTest):
             cmd.append("---disable_opts")
 
         try:
-            return subprocess.run(cmd, universal_newlines=True, timeout=timeout, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            return subprocess.run(cmd, universal_newlines=True, timeout=300, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         except subprocess.TimeoutExpired:
             raise base.TestTimeoutError("oclgrind")
         except subprocess.SubprocessError:
