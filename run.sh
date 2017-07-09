@@ -21,6 +21,7 @@ set -eux
 export CREDUCE_TEST_PLATFORM=$1
 export CREDUCE_TEST_DEVICE=$2
 export OUTPUT_DIR=$3
+export OUTPUT_LOG=$3.txt
 
 echo "Testing platform $CREDUCE_TEST_PLATFORM, device $CREDUCE_TEST_DEVICE, output directory $OUTPUT_DIR"
 mkdir -pv $OUTPUT_DIR
@@ -47,7 +48,7 @@ export CREDUCE_TEST_CONSERVATIVE=1
 # Enable static checks in the interestingness test
 export CREDUCE_TEST_STATIC=1
 
-python3 ./scripts/reduction_helper.py \
+{ time python ./scripts/reduction_helper.py \
     --generate 1000 \
     --modes barriers atomics atomic_reductions vectors inter_thread_comm \
     --preprocess \
@@ -57,4 +58,4 @@ python3 ./scripts/reduction_helper.py \
     --check \
     --reduce \
     -n 4 \
-    --verbose
+    --verbose } 2>&1 | tee $OUTPUT_LOG
