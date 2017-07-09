@@ -21,7 +21,9 @@ set -eux
 export CREDUCE_TEST_PLATFORM=$1
 export CREDUCE_TEST_DEVICE=$2
 export OUTPUT_DIR=$3
-export OUTPUT_LOG=$3.txt
+export OPTIMISATION_LEVEL=$3
+export OUTPUT_DIR=$4
+export OUTPUT_LOG=$4.txt
 
 echo "Testing platform $CREDUCE_TEST_PLATFORM, device $CREDUCE_TEST_DEVICE, output directory $OUTPUT_DIR"
 mkdir -pv $OUTPUT_DIR
