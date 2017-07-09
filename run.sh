@@ -8,10 +8,10 @@
 #   5. If 'interesting', reduce using creduce
 #
 usage() {
-    echo "usage: $0 <platform-id> <device-id> <output-dir>"
+    echo "usage: $0 <platform-id> <device-id> <optimisation-level> <output-dir>"
 }
 
-if [ $# -ne 3 ]; then
+if [ $# -ne 4 ]; then
     usage >&2
     exit 1
 fi
@@ -44,13 +44,14 @@ export CREDUCE_TEST_TIMEOUT=60
 export CREDUCE_TEST_USE_ORACLE=1
 # Only if oracle is used: Which optimisation level should be checked and
 # has to be miscompiled to make the test case interesting
-export CREDUCE_TEST_OPTIMISATION_LEVEL=either
+export CREDUCE_TEST_OPTIMISATION_LEVEL=$OPTIMISATION_LEVEL
 # Check result access and get_linear_global_id
 export CREDUCE_TEST_CONSERVATIVE=1
 # Enable static checks in the interestingness test
 export CREDUCE_TEST_STATIC=1
 
-{ time python ./scripts/reduction_helper.py \
+{
+    time python ./scripts/reduction_helper.py \
     --generate 1000 \
     --modes barriers atomics atomic_reductions vectors inter_thread_comm \
     --preprocess \
@@ -60,4 +61,5 @@ export CREDUCE_TEST_STATIC=1
     --check \
     --reduce \
     -n 4 \
-    --verbose } 2>&1 | tee $OUTPUT_LOG
+    --verbose
+} 2>&1 | tee $OUTPUT_LOG
