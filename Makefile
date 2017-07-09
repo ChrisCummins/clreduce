@@ -19,7 +19,7 @@ oclgrind: build_oclgrind/oclgrind
 
 build_oclgrind/oclgrind: llvm
 	mkdir -pv build_oclgrind
-	cd build_oclgrind && cmake -DCMAKE_INSTALL_PREFIX=../install -DCMAKE_BUILD_TYPE=Release ../Oclgrind -G Ninja
+	cd build_oclgrind && cmake -DCMAKE_INSTALL_PREFIX=../install -DCMAKE_PREFIX_PATH=../install -DCMAKE_BUILD_TYPE=Release ../Oclgrind -G Ninja
 	cmake --build ./build_oclgrind --target install --config Release
 
 creduce: build_creduce/creduce/creduce
