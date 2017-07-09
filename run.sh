@@ -23,6 +23,7 @@ export CREDUCE_TEST_DEVICE=$2
 export OUTPUT_DIR=$3
 
 echo "Testing platform $CREDUCE_TEST_PLATFORM, device $CREDUCE_TEST_DEVICE, output directory $OUTPUT_DIR"
+mkdir -pv $OUTPUT_DIR
 
 # Paths
 export PATH=$(pwd)/build_oclgrind:$(pwd)/build_clsmith:$(pwd)/build_llvm/bin:$PATH
