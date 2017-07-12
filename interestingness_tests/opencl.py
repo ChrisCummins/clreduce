@@ -1,8 +1,9 @@
-from interestingness_tests import base
 import os
 import platform
 import re
 import subprocess
+
+import base
 
 class OpenCLInterestingnessTest(base.InterestingnessTest):
     @classmethod
@@ -62,7 +63,7 @@ class OpenCLInterestingnessTest(base.InterestingnessTest):
 
     def _run_clang(self, test_case, timeout, extra_args=None):
         cmd = [self.clang]
-        cmd.extend(["-x", "cl", "-fno-builtin", "-include", "clc/clc.h", "-Dcl_clang_storage_class_specifiers", "-g", "-c", "-Wall", "-Wextra", "-pedantic", "-Wconditional-uninitialized", "-Weverything", "-Wno-reserved-id-macro", "-fno-caret-diagnostics", "-fno-diagnostics-fixit-info", "-O1"])
+        cmd.extend(["-x", "cl", "-fno-builtin", "-include", "clc/clc.h", "-Dcl_clang_storage_class_specifiers", "-g", "-c", "-Wextra", "-pedantic", "-Wconditional-uninitialized", "-Weverything", "-Wno-reserved-id-macro", "-fno-caret-diagnostics", "-fno-diagnostics-fixit-info", "-O1"])
 
         if self.libclc_include_path is not None:
             cmd.extend(["-I", self.libclc_include_path])
@@ -90,16 +91,21 @@ class OpenCLInterestingnessTest(base.InterestingnessTest):
             raise base.TestTimeoutError("clang static analyzer")
 
     def _run_oclgrind(self, test_case, timeout, optimised):
-        cmd = ["oclgrind"]
-        cmd.extend(["-Wall", "--uninitialized", "--arithmetic-exceptions", "--data-races", "--uniform-writes", "--stop-errors", "1"])
-        cmd.append(self.cl_launcher)
-        cmd.extend(["-p", "0", "-d", "0", "-f", test_case])
+        cmd = [
+            os.environ.get("OCLGRIND", "oclgrind"),
+            "--uninitialized", "--data-races", "--uniform-writes", "--uniform-writes",
+            self.cl_launcher, "-p", "0", "-d", "0", "-f", test_case
+        ]
 
         if not optimised:
             cmd.append("---disable_opts")
 
+        print("$", ' '.join(cmd))
+
         try:
-            return subprocess.run(cmd, universal_newlines=True, timeout=300, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            p = subprocess.run(cmd, universal_newlines=True, timeout=300, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            print(p.stderr)
+            return p
         except subprocess.TimeoutExpired:
             raise base.TestTimeoutError("oclgrind")
         except subprocess.SubprocessError:
@@ -107,13 +113,16 @@ class OpenCLInterestingnessTest(base.InterestingnessTest):
 
     def _run_cl_launcher(self, test_case, platform, device, timeout, optimised):
         cmd = [self.cl_launcher]
-        cmd.extend(["-p", str(platform), "-d", str(device), "-f", test_case])
+        cmd.extend(["-p", str(platform), "-d", str(device), "-f", test_case, '---debug'])
 
         if not optimised:
             cmd.append("---disable_opts")
+        print("$", ' '.join(cmd))
 
         try:
-            return subprocess.run(cmd, universal_newlines=True, timeout=timeout, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            p = subprocess.run(cmd, universal_newlines=True, timeout=timeout, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            print(p.stderr)
+            return p
         except subprocess.TimeoutExpired:
             raise base.TestTimeoutError("cl_launcher")
         except subprocess.SubprocessError:
@@ -249,15 +258,24 @@ class OpenCLInterestingnessTest(base.InterestingnessTest):
         proc_opt = self._run_oclgrind(test_case, timeout, optimised=True)
 
         if proc_opt is None or proc_opt.returncode != 0:
+            if proc_opt:
+                print("! oclgrind opt returned with", proc_opt.returncode)
+                print(proc_opt.stdout)
+                print(proc_opt.stderr)
             return None
 
         proc_unopt = self._run_oclgrind(test_case, timeout, optimised=False)
 
         if proc_unopt is None or proc_unopt.returncode != 0:
+            if proc_opt:
+                print("! oclgrind unopt returned with", proc_opt.returncode)
+                print(proc_opt.stdout)
+                print(proc_opt.stderr)
             return None
 
         # Check for error in Oclgrind/Clang
         if proc_opt.stdout != proc_unopt.stdout:
+            print("! oclgrind output disagrees")
             return None
 
         return proc_opt.stdout

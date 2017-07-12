@@ -342,6 +342,7 @@ if __name__ == "__main__":
                     stop = False
                     size_before = os.path.getsize(test_case_path)
                     start = time.monotonic()
+                    print("\ncmd", ' '.join(cmd))
                     proc = subprocess.run(cmd, env=reduction_env, stdout=log, stderr=subprocess.STDOUT, universal_newlines=True)
 
                     if proc.returncode:

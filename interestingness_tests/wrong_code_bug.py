@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
 from enum import Enum
-from interestingness_tests import base
-from interestingness_tests import opencl
 import os
 import sys
+
+import base
+import opencl
 
 class WrongCodeBugOpenCLInterestingnessTest(opencl.OpenCLInterestingnessTest):
     class OptimisationLevel(Enum):
@@ -56,7 +57,9 @@ class WrongCodeBugOpenCLInterestingnessTest(opencl.OpenCLInterestingnessTest):
         self.check_static = self.options["check_static"]
 
     def check(self):
+        print("> check()")
         if self.check_static:
+            print("> check_static")
             if not self.is_valid_cl_launcher_test_case(self.test_case):
                 raise base.InvalidTestCaseError("cl_launcher")
 
@@ -64,27 +67,45 @@ class WrongCodeBugOpenCLInterestingnessTest(opencl.OpenCLInterestingnessTest):
                 raise base.InvalidTestCaseError("static")
 
         if self.use_oracle:
+            print("> use oracle")
+
             # Implicitly checks if test case is valid in Oclgrind
             oracle = self.get_oracle_result(self.test_case, self.timeout)
 
             if oracle is None:
+                print("! no oracle result")
                 raise base.InvalidTestCaseError("oracle")
 
             if self.optimisation_level is self.OptimisationLevel.optimised:
+                print("> optimised")
                 proc_opt = self._run_cl_launcher(self.test_case, self.platform, self.device, self.timeout, optimised=True)
-
                 if proc_opt is None or proc_opt.returncode != 0:
                     raise base.InvalidTestCaseError("optimised")
 
-                return proc_opt.stdout != oracle
+                ret = proc_opt.stdout != oracle
+                if not ret:
+                    print("! proc_opt == oracle")
+                    print(proc_opt.stdout[:100])
+                    print(oracle[:100])
+                return ret
             elif self.optimisation_level is self.OptimisationLevel.unoptimised:
+                print("> unoptimised")
                 proc_unopt = self._run_cl_launcher(self.test_case, self.platform, self.device, self.timeout, optimised=False)
 
                 if proc_unopt is None or proc_unopt.returncode != 0:
+                    print("! proc_unopt")
                     raise base.InvalidTestCaseError("unoptimised")
 
-                return proc_unopt.stdout != oracle
+                ret = proc_unopt.stdout != oracle
+                if not ret:
+                    print("! proc_unopt == oracle")
+                    print(proc_opt.stdout[:100])
+                    print(oracle[:100])
+                return ret
             elif self.optimisation_level is self.OptimisationLevel.either:
+                print("> either")
+
+                # HERE
                 proc_opt = self._run_cl_launcher(self.test_case, self.platform, self.device, self.timeout, optimised=True)
 
                 if proc_opt is None or proc_opt.returncode != 0:
@@ -103,6 +124,7 @@ class WrongCodeBugOpenCLInterestingnessTest(opencl.OpenCLInterestingnessTest):
 
                 return False
             elif self.optimisation_level is self.OptimisationLevel.all:
+                print("> all")
                 proc_opt = self._run_cl_launcher(self.test_case, self.platform, self.device, self.timeout, optimised=True)
 
                 if proc_opt is None or proc_opt.returncode != 0:
@@ -121,6 +143,7 @@ class WrongCodeBugOpenCLInterestingnessTest(opencl.OpenCLInterestingnessTest):
 
                 return True
         else:
+            print("> no oracle")
             #FIXME: Need to run both?
             if (not self.is_valid_oclgrind(self.test_case, self.timeout, optimised=True) or
                 not self.is_valid_oclgrind(self.test_case, self.timeout, optimised=False)):
@@ -147,7 +170,7 @@ if __name__ == "__main__":
     if (test_case is None or
         not os.path.isfile(test_case) or
         not os.access(test_case, os.F_OK)):
-        print("Test case '{}' does not exist!".format(test_case=test_case)
+        print("Test case '{}' does not exist!".format(test_case)
               if test_case else
               "No test case! Set $CREDUCE_TEST_CASE or pass as argument")
         sys.exit(1)
