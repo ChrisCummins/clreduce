@@ -30,4 +30,5 @@ class InterestingnessTest:
         if result:
             sys.exit(0)
         else:
+            print('{}.check() failed'.format(self.__class__.__name__))
             sys.exit(1)
