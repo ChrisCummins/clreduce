@@ -276,7 +276,9 @@ class OpenCLInterestingnessTest(base.InterestingnessTest):
         # Check for error in Oclgrind/Clang
         if proc_opt.stdout != proc_unopt.stdout:
             print("! oclgrind output disagrees")
-            return None
+            print("Optimised stdout:  ", proc_opt.stdout[:100])
+            print("Unoptimised stdout:", proc_unopt.stdout[:100])
+            # FIXME: return None
 
         return proc_opt.stdout
 

@@ -85,8 +85,10 @@ class WrongCodeBugOpenCLInterestingnessTest(opencl.OpenCLInterestingnessTest):
                 ret = proc_opt.stdout != oracle
                 if not ret:
                     print("! proc_opt == oracle")
-                    print(proc_opt.stdout[:100])
-                    print(oracle[:100])
+                    print("The device under test (DUT) produces the same output as the oracle.")
+                    print("DUT output:   ", proc_opt.stdout[:80])
+                    print("Oracle output:", oracle[:80])
+                    print("DUT stderr:   ", proc_opt.stderr)
                 return ret
             elif self.optimisation_level is self.OptimisationLevel.unoptimised:
                 print("> unoptimised")
