@@ -1,26 +1,29 @@
 all: creduce
 
+# Allow overriding from the command line:
+CMAKE ?= cmake
+
 clsmith: build_clsmith/cl_launcher
 
 build_clsmith/cl_launcher:
 	mkdir -pv build_clsmith
-	cd build_clsmith && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=../install ../CLSmith -G Ninja
-	cmake --build ./build_clsmith --target install --config Release
+	cd build_clsmith && $(CMAKE) -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=../install ../CLSmith -G Ninja
+	$(CMAKE) --build ./build_clsmith --target install --config Release
 	cp -v CLSmith/runtime/*.h build_clsmith
 
 llvm: build_llvm/bin/llvm-config
 
 build_llvm/bin/llvm-config:
 	mkdir -pv build_llvm
-	cd build_llvm && cmake -DLLVM_EXTERNAL_CLANG_SOURCE_DIR=../clang -DLLVM_TARGETS_TO_BUILD=X86 -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=../install ../llvm -G Ninja
-	cmake --build ./build_llvm --target install --config Release
+	cd build_llvm && $(CMAKE) -DLLVM_EXTERNAL_CLANG_SOURCE_DIR=../clang -DLLVM_TARGETS_TO_BUILD=X86 -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=../install ../llvm -G Ninja
+	$(CMAKE) --build ./build_llvm --target install --config Release
 
 oclgrind: build_oclgrind/oclgrind
 
 build_oclgrind/oclgrind: llvm
 	mkdir -pv build_oclgrind
-	cd build_oclgrind && cmake -DCMAKE_INSTALL_PREFIX=../install -DCMAKE_PREFIX_PATH=../install -DCMAKE_BUILD_TYPE=Release ../Oclgrind -G Ninja
-	cmake --build ./build_oclgrind --target install --config Release
+	cd build_oclgrind && $(CMAKE) -DCMAKE_INSTALL_PREFIX=../install -DCMAKE_PREFIX_PATH=../install -DCMAKE_BUILD_TYPE=Release ../Oclgrind -G Ninja
+	$(CMAKE) --build ./build_oclgrind --target install --config Release
 
 creduce: build_creduce/creduce/creduce
 
@@ -33,8 +36,8 @@ build_creduce/creduce/creduce: clsmith llvm oclgrind
 	sudo cpan Sys::CPU
 	sudo cpan Term::ReadKey
 	mkdir -pv build_creduce
-	cd build_creduce && cmake -DCMAKE_INSTALL_PREFIX=../install -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=../install ../creduce -G Ninja
-	cmake --build ./build_creduce --target install --config Release
+	cd build_creduce && $(CMAKE) -DCMAKE_INSTALL_PREFIX=../install -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=../install ../creduce -G Ninja
+	$(CMAKE) --build ./build_creduce --target install --config Release
 
 
 .PHONY: clean
