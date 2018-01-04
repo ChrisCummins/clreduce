@@ -28,13 +28,13 @@ build_oclgrind/oclgrind: llvm
 creduce: build_creduce/creduce/creduce
 
 build_creduce/creduce/creduce: clsmith llvm oclgrind
-	sudo apt-get install -y flex
-	sudo cpan Exporter::Lite
-	sudo cpan File::Which
-	sudo cpan Getopt::Tabular
-	sudo cpan Regexp::Common
-	sudo cpan Sys::CPU
-	sudo cpan Term::ReadKey
+	# sudo apt-get install -y flex
+	# sudo cpan Exporter::Lite
+	# sudo cpan File::Which
+	# sudo cpan Getopt::Tabular
+	# sudo cpan Regexp::Common
+	# sudo cpan Sys::CPU
+	# sudo cpan Term::ReadKey
 	mkdir -pv build_creduce
 	cd build_creduce && $(CMAKE) -DCMAKE_INSTALL_PREFIX=../install -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=../install ../creduce -G Ninja
 	$(CMAKE) --build ./build_creduce --target install --config Release
