@@ -4,8 +4,8 @@ from enum import Enum
 import os
 import sys
 
-import base
-import opencl
+from . import base
+from . import opencl
 
 class WrongCodeBugOpenCLInterestingnessTest(opencl.OpenCLInterestingnessTest):
     class OptimisationLevel(Enum):

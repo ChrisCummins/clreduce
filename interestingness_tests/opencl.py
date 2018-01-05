@@ -3,7 +3,7 @@ import platform
 import re
 import subprocess
 
-import base
+from . import base
 
 class OpenCLInterestingnessTest(base.InterestingnessTest):
     @classmethod
